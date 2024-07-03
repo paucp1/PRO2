@@ -1,0 +1,97 @@
+/*
+Hem decidit estendre la classe Cjt_estudiants que heu vist al laboratori amb una nova funcionalitat: obtenir la nota mitjana dels estudiants amb nota del conjunt. Hem optat per afegir una nova operació pública amb la següent especificació:
+
+double mitjana_estudiants_amb_nota() const;
+/* Pre: cert */
+/* Post: el resultat és la mitjana de les notes dels estudiants amb nota
+   del paràmetre implícit; si no n'hi ha cap, el resultat és -1 */ 
+Això ha suposat afegir atributs nous a la classe. Tenint això en compte, només heu d’implementar eficientment les següents operacions:
+
+void afegir_estudiant(const Estudiant &est, bool& b);
+/* Pre: el paràmetre implícit no està ple */
+/* Post: b = indica si el p.i. original conté un estudiant amb el dni d'est;
+   si b = fals, s'ha afegit l'estudiant est al paràmetre implícit */
+
+void esborrar_estudiant(int dni, bool& b);
+/* Pre: cert */
+/* Post: b indica si el paràmetre implícit original tenia un estudiant 
+   amb el dni dni; si b, aquest estudiant ha quedat eliminat
+   del paràmetre implícit */
+Observació
+
+Heu de lliurar un fitxer solucio.cc amb una implementació eficient de les operacions afegir_estudiant i esborrar_estudiant que ha de tenir el següent format:
+
+#include "Cjt_estudiants.hh"
+
+void Cjt_estudiants::afegir_estudiant(const Estudiant &est, bool& b)
+{
+  ... // codi de la implementació
+}
+
+void Cjt_estudiants::esborrar_estudiant(int dni, bool& b)
+{
+  ... // codi de la implementació
+}
+Copieu aquesta plantilla en el vostre solucio.cc i completeu-la. El vostre solucio.cc no pot contenir la implementació d’altres operacions de la classe.
+
+A l’apartat Public files del Jutge us proveïm amb material addicional comprimit en un fitxer .tar. Podeu descomprimir aquest fitxer amb la comanda
+
+   tar -xvf nom_fitxer.tar
+Aquest material addicional consisteix en els següents fitxers:
+
+Cjt_estudiants.hh: l’especificació Pre/Post de totes les operacions públiques i privades d’aquesta nova versió de la classe Cjt_estudiants, així como la definició dels camps privats. Fixeu-vos que hi ha dos atributs nous: un enter nest_amb_nota, que conté el nombre d’estudiants amb nota i un double suma_notes, que conté la suma de les notes dels estudiants del conjunt. Aquest dos atributs ens han permès implementar amb la màxima eficiència l’operació mitjana_estudiants_amb_nota i cal actualitzar-los en las operacions modificadores de la classe. És molt important que la implementació de les operacions que us hem encarregat tingui en compte i preservi l’invariant de la representació de la classe Cjt_estudiants.
+Cjt_estudiants.cc: la implementació de totes de les operacions de la nova versió de la classe Cjt_estudiants tret de les operacions afegir_estudiant i esborrar_estudiant.
+Estudiant.hh: l’especificació de la classe Estudiant i la definició dels seus atributs. No presenta cap novetat, tret d’una operació addicional, comp, que permet comparar dos estudiants.
+Estudiant.cc: la implementació dels mètodes de la classe Estudiant.
+pro2.cc: un programa principal que podeu fer servir per provar les operacions públiques d’aquesta versió de la classe Cjt_estudiants.
+llegeixme.txt: instruccions per a generar l’executable del programa pro2 i provar-lo.
+Valorarem positivament que la solució no contingui instruccions (especialment bucles o crides a operacions costoses) ni objectes (especialment vectors o conjunts) innecessaris. No es pot emprar cap estructura de dades que no hagi aparegut a les sessions 1-5 de laboratori.
+ 
+Quan feu els enviaments el Jutge us indicarà quants jocs de proves passeu i de quin tipus (public o privat). El joc de proves anomenat public és el que teniu al fitxer llegeixme.txt. El privat1 és molt semblant al public. Els privat2 i privat3 proven situacions especials.
+*/
+
+#include "Cjt_estudiants.hh"
+
+void Cjt_estudiants::afegir_estudiant(const Estudiant &est, bool& b)
+{
+    b = false;
+    int i = cerca_dicot(vest,0,nest-1,est.consultar_DNI());
+    if (vest[i].consultar_DNI() == est.consultar_DNI()) {
+        b = true;
+    }
+    
+    if (not b) {
+        ++nest;
+        for (int j = nest - 1; j > i; --j) {
+            vest[j] = vest[j - 1];
+        }
+        vest[i] = est;
+        if (est.te_nota()) {
+            ++nest_amb_nota;
+            suma_notes = suma_notes + est.consultar_nota();
+        }
+    }
+}
+
+
+void Cjt_estudiants::esborrar_estudiant(int dni, bool& b)
+{
+    b = false;
+    int i = 0;
+    while (not b and i < nest) {
+        if (vest[i].consultar_DNI() == dni) {
+            b = true;
+        }
+        ++i;
+    }
+    if (b) {
+        if (vest[i - 1].te_nota()) {
+            --nest_amb_nota;
+            suma_notes = suma_notes - vest[i - 1].consultar_nota();
+        }
+        for (int j = i; j < nest; ++j) {
+            vest[j - 1] = vest[j];
+        }
+        --nest;
+    }
+}
